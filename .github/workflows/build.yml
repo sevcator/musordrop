@@ -1,0 +1,40 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64 upx-ucl
+
+      - name: Extract frames, chroma key, audio
+        shell: pwsh
+        run: ./tools/make_assets.ps1 -Video src/target.mp4 -Mask assets/musordrop_mask.bin -OutDir build
+
+      - name: Build exe
+        shell: pwsh
+        run: ./tools/build.ps1 -OutDir build
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          N=$(gh release list --limit 200 --json tagName --jq 'map(.tagName | select(test("^[0-9]+$")) | tonumber) | max // 0')
+          N=$((N+1))
+          gh release create "$N" build/musordrop.exe --title "musordrop $N" --notes "musordrop build $N"
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf build
