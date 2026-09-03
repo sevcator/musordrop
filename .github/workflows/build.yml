@@ -33,7 +33,7 @@ jobs:
         run: |
           N=$(gh release list --limit 200 --json tagName --jq 'map(.tagName | select(test("^[0-9]+$")) | tonumber) | max // 0')
           N=$((N+1))
-          gh release create "$N" build/musordrop.exe --title "musordrop $N" --notes "musordrop build $N"
+          gh release create "$N" build/musordrop.exe --title "$N" --notes "build $N"
 
       - name: Cleanup
         if: always()
