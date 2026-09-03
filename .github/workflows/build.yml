@@ -1,8 +1,8 @@
-name: build
+name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64 upx-ucl
+          sudo apt-get install -y ffmpeg gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64 upx-ucl
 
       - name: Extract frames, chroma key, audio
         shell: pwsh
